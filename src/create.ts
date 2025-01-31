@@ -51,7 +51,8 @@ export function createTar(
   let offset = 0;
 
   for (const file of _files) {
-    const isDir = !file.data;
+    const isSymlink = !!file.symlink;
+    const isDir = !isSymlink && !file.data;
 
     // -- Header --
     // File name (offset: 0 - length: 100)
@@ -83,8 +84,14 @@ export function createTar(
     );
 
     // File type (offset: 156 - length: 1)
-    const type = isDir ? "5" : "0";
+    const type = isDir ? "5" : (isSymlink ? "2" : "0");
     _writeString(buffer, type, offset + 156, 1);
+
+    if (isSymlink) {
+      // Name of linked file (offset: 157 - length: 100)
+      if (file.symlink!.length > 100) { throw new Error("link too long") }
+      _writeString(buffer, file.symlink!, offset + 157, file.symlink!.length);
+    }
 
     // USTAR indicator (offset: 257 - length: 512)
     _writeString(buffer, "ustar", offset + 257, 6 /* magic string */);

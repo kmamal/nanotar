@@ -73,6 +73,13 @@ export function parseTar<
     const _type = (_readString(buffer, offset + 156, 1) || "0") as keyof typeof tarItemTypeMap;
     const type = tarItemTypeMap[_type] || _type;
 
+    // Name of linked file (offset: 157 - length: 100)
+    // Only for symlinks
+    let symlink
+    if (type === "symbolicLink") {
+        symlink = _readString(buffer, offset + 157, 100).trim();
+    }
+
     // Special types
     switch (type) {
       // Extended headers for next entry
@@ -120,6 +127,7 @@ export function parseTar<
     const meta: ParsedTarFileItemMeta = {
       name,
       type,
+      symlink,
       size,
       attrs: {
         ...globalExtendedHeader,

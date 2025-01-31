@@ -17,6 +17,12 @@ export type TarFileItem<DataT = Uint8Array> = {
   data?: DataT;
 
   /**
+   * The name of the file the symlink points to. Only included for symlinks.
+   * @optional
+   */
+  symlink?: string;
+
+  /**
    * The attributes of the file. See {@link TarFileAttrs}.
    * @optional
    */
@@ -30,6 +36,11 @@ export interface ParsedTarFileItem extends TarFileItem {
    * The type of file system element. It is usually `"file"` or `"directory"`.
    */
   type: TarFileItemType | undefined;
+
+  /**
+   * If type is "symbolicLink", then this is where the link points to.
+   */
+  symlink: string | undefined;
 
   /**
    * The size of the file in bytes.
